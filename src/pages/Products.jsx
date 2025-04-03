@@ -14,6 +14,10 @@ import { setProdcut } from '../redux/prodcutSlice'
 import { getData } from '../../../Admin/Admin/src/utils/ProductList'
 import { useState } from 'react'
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+
+
 
 const menu = [
   {
@@ -83,7 +87,7 @@ function Products() {
   const fetchInfo = async () => {
     const response = await getData()
     console.log(response.data)
-    if(response.data){
+    if (response.data) {
       setProduct(response.data);
     }
   };
@@ -92,36 +96,71 @@ function Products() {
     fetchInfo();
   }, []);
 
+  const navigate = useNavigate();
+
+  const handleClick = (id) => {
+
+    const user = localStorage.getItem("id");
+    console.log("aaaaaaaa", user);
+
+
+    if (user) {
+      const userData = (user);
+      console.log("User Data:", userData);
+      console.log("User is logged in:", userData);
+
+      
+      fetch('http://localhost:3000/api/post-cart', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: user,  
+          product: id,
+          quantity: 1  
+        })
+      })
+        .then(response => response.json())
+        .then(data => console.log("Cart Data:", data))
+        .catch(error => console.error("Error fetching cart:", error));
+
+    } else {
+      console.log("User is not logged in");
+      // alert('please Login')
+      // navigate("/Login");
+    }
+  };
+
+
+
+
+
   return (
     <section className='justify-center items-center w-[100%] flex'>
       <div className="container w-[85%]">
         <h1 className='text-2xl uppercase font-bold text-center mt-10'>Our menu</h1>
 
         <div className="grid grid-cols-1 mt-12 text-center gap-y-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {product.map((product,index) => (
-          <Card
-          key={index}
-          title={product.name}
-          variant="borderless"
-          style={{
-            width: 300,
-          }}
-          
-        >
-          <p> <img className='h-[220px] w-[220px]' src={product.image} alt="" /> </p>
-          <p className='text-xl text-red-500 mt-10 font-semibold'>$ {product.price}</p>
-          {/* <p className='text-xl text-red-500 mt-10 font-semibold'>{product.unit}</p> */}
-          <button onClick={()=>{
-            dispatch(setProdcut(product))
-            
-          }} className='mt-4 bg-rose-500 rounded-full text-white px-5 py-2 font-semibold hover:bg-rose-600 cursor-pointer'>Add to cart</button>
-          
-        </Card>
-         ))}
+          {product.map((product, index) => (
+            <Card
+              key={index}
+              title={product.name}
+              variant="borderless"
+              style={{
+                width: 300,
+              }}
+
+            >
+              <p> <img className='h-[220px] w-[220px]' src={product.image} alt="" /> </p>
+              <p className='text-xl text-red-500 mt-10 font-semibold'>$ {product.price}</p>
+              {/* <p className='text-xl text-red-500 mt-10 font-semibold'>{product.unit}</p> */}
+              <button onClick={()=>handleClick(product._id)} className='mt-4 bg-rose-500 rounded-full text-white px-5 py-2 font-semibold hover:bg-rose-600 cursor-pointer'>Add to cart</button>
+
+            </Card>
+          ))}
 
         </div>
       </div>
-      
+
     </section>
   )
 }

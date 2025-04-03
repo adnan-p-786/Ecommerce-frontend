@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
 function Login() {
   const [state, setState] = useState('signUp')
+  const [id, setId] = useState([])
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -13,7 +14,6 @@ function Login() {
 
   const onSubmitHandler = async (event) => {
     event.preventDefault()
-
     try {
       if (state === 'signUp') {
         // Sign-up logic
@@ -21,29 +21,39 @@ function Login() {
           'http://localhost:3000/api/create-user',
           { name, password, email }
         )
+        console.log(data);
 
         if (data.success) {
-          navigate('/') // Redirect to home page after login
-        } else {
-          alert(data.message)
+          localStorage.setItem('email', data.email)
+          setEmail(data.email)
+          // console.log(email);
+          console.log("response", data);
+          navigate('/')
+
         }
+
+
       } else {
         // Login logic
         const { data } = await axios.post(
           'http://localhost:3000/api/login-user',
-          { password, email }
+          { password, email, }
         )
-
+        console.log(data);
         if (data.success) {
-          navigate('/') // Redirect to home page after login
-        } else {
-          alert(data.message)
+          localStorage.setItem('token', data.data.token); // Save token
+          localStorage.setItem('id', data.data.id);   
+          localStorage.setItem('email', data.data.email)
+          setEmail(data.email)
+          navigate('/')
         }
-      }
+
+      } 
     } catch (error) {
       alert(error.response?.data?.message || 'Something went wrong')
     }
   }
+
 
   return (
     <form onSubmit={onSubmitHandler}>
@@ -68,6 +78,7 @@ function Login() {
           <input
             className='bg-slate-200 mt-4 rounded-md h-10 w-full px-3'
             type='email'
+            value={email}
             placeholder='Email'
             onChange={(e) => setEmail(e.target.value)}
             required
