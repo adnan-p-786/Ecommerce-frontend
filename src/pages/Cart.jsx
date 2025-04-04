@@ -10,6 +10,7 @@ import fruit8 from '../assets/shammam.jpg'
 import { useSelector } from 'react-redux'
 import { useState } from 'react'
 import { useEffect } from 'react'
+import { MdOutlineDeleteOutline } from "react-icons/md";
 
 // const cart = [
 //   {
@@ -71,18 +72,32 @@ function Cart() {
   const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
-    const userId = localStorage.getItem("id"); 
+    const userId = localStorage.getItem("id");
     console.log(userId);
-    
+
     if (userId) {
-      fetch(`http://localhost:3000/api/get-cart/${userId}`) 
+      fetch(`http://localhost:3000/api/get-cart/${userId}`)
         .then(response => response.json())
-        .then(data => {
-          setCartItems(data.cartItems); 
+        .then(data => { 
+          console.log("Fetched Data:", data);
+          // setCartItems(Array.isArray(data.cartItems) ? data.cartItems : []);
+          setCartItems(data)
         })
         .catch(error => console.error("Error fetching cart items:", error));
     }
   }, []);
+
+  const totalPrice = cartItems.reduce((acc, item) => {
+    const price = parseFloat(item.product.price) || 0;
+    return acc + price;
+  }, 0);
+
+  const handleRemove = (id) => {
+    const updatedCart = cartItems.filter(item => item.id !== id);
+    setCartItems(updatedCart); // assuming you're managing cartItems via state
+  };
+  
+  
 
   return (
     <div className="flex items-center justify-center w-[100%] mt-10">
@@ -94,31 +109,33 @@ function Cart() {
           <thead className="bg-gray-300 text-gray-700">
             <tr>
               <th className="border border-gray-400 p-3 text-center">Product</th>
+              <th className="border border-gray-400 p-3 text-center">Quantity</th>
               <th className="border border-gray-400 p-3 text-center">Price</th>
+              <th className="border border-gray-400 p-3 text-center">Remove</th>
             </tr>
           </thead>
-          <tbody className="bg-white">
-              <tr className="text-center border-b border-gray-300 transition">
-                <td className="border border-gray-300 p-3 text-center">
-                  <div className='items-center justify-center flex'>
-                    <img className='h-20 w-20' src="" alt="" />
-
-                  </div>
-                  <h1 className='mt-4 text-lg'>ghf</h1>
-                </td>
-                <td className="border border-gray-300 p-3 text-center"></td>
-              </tr>
+          <tbody className="bg-white text-2xl"> 
+            {cartItems.map((item) => (
+                <tr key={item.id} className="text-center border-b border-gray-300 transition">
+                  <td className="border border-gray-300 p-3 text-center">
+                    <div className="items-center justify-center flex">
+                      <img className="h-20 w-20" src={item.product.image || ''} alt={item.title || 'Product'} />
+                    </div>
+                    <h1 className="mt-4 text-lg">{item.product.name || 'Unknown Product'}</h1>
+                  </td>
+                  <td className="border border-gray-300 p-3 text-center">{item.product.unit}</td>
+                  <td className="border border-gray-300 p-3 text-center text-red-400">$ {item.product.price || '$0.00'}</td>
+                 <td><button onClick={()=>handleRemove(item.id)} className='ml-5 text-3xl hover:text-red-500 cursor-pointer'><MdOutlineDeleteOutline /></button></td>   
+                </tr>
+            ))}
           </tbody>
+
+
         </table>
         <div className="flex justify-between items-center bg-yellow-500 text-white text-xl font-semibold p-4 mt-4 rounded-b-lg">
           <span>Total</span>
-          <span></span>
+          <span>$ {totalPrice.toFixed(2)}</span>
         </div>
-        {/* <div className="flex justify-center md:justify-end lg:justify-end xl:justify-end mt-5">
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg  shadow-md hover:bg-blue-700 transition">
-            Checkout
-          </button>
-        </div> */}
       </div>
     </div>
 

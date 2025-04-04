@@ -101,12 +101,11 @@ function Products() {
   const handleClick = (id) => {
 
     const user = localStorage.getItem("id");
-    console.log("aaaaaaaa", user);
+    // console.log("aaaaaaaa", user);
 
 
     if (user) {
       const userData = (user);
-      console.log("User Data:", userData);
       console.log("User is logged in:", userData);
 
       
@@ -125,8 +124,8 @@ function Products() {
 
     } else {
       console.log("User is not logged in");
-      // alert('please Login')
-      // navigate("/Login");
+      alert('please Login')
+      navigate("/Login");
     }
   };
 
